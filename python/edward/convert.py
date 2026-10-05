@@ -103,6 +103,10 @@ def _apply_options(root, options, warnings):
     return satin_count
 
 
+# Hints that only make sense inside Inkscape (we create these satins ourselves on purpose).
+_IGNORED_WARNINGS = {"StrokeSatinWarning"}
+
+
 def _collect_elements(root, warnings):
     """Return stitchable elements; report problems as warnings and skip invalid ones."""
     elements = []
@@ -119,6 +123,8 @@ def _collect_elements(root, warnings):
             try:
                 errors = list(element.validation_errors())
                 for w in element.validation_warnings():
+                    if type(w).__name__ in _IGNORED_WARNINGS:
+                        continue
                     warn(f"{_label(element)}: {_clean(w.name)} - {_clean(w.description)}")
             except Exception as e:  # a broken shape must not take the whole conversion down
                 warn(f"{_label(element)}: could not be checked ({_clean(e)}), skipped")
