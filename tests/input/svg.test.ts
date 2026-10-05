@@ -120,10 +120,9 @@ describe('warnings', () => {
     expect(load('width="50mm" height="50mm"', '<g/>').warnings.join()).toMatch(/Nothing to stitch/);
   });
 
-  it('warns for oversize and tiny designs', () => {
-    expect(load('width="500mm" height="100mm"').warnings.join()).toMatch(/larger than 400/);
-    expect(load('width="2mm" height="2mm"').warnings.join()).toMatch(/very small/);
-    expect(load('width="400mm" height="400mm"').warnings).toEqual([]);
+  it("doesn't warn about the file's size (the UI resizes and checks the hoop)", () => {
+    expect(load('width="928mm" height="1313mm"').warnings).toEqual([]);
+    expect(load('width="2mm" height="2mm"').warnings).toEqual([]);
   });
 });
 

@@ -8,9 +8,6 @@ const KEEP_INKSCAPE_ATTRS = new Set(['groupmode', 'label']);
 const STITCHABLE = new Set(['path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon']);
 const PAINT_SERVERS = new Set(['lineargradient', 'radialgradient', 'meshgradient', 'pattern']);
 
-export const MAX_DESIGN_MM = 400;
-export const MIN_DESIGN_MM = 3;
-
 export interface NormalizedSvg {
   page: InputPage;
   warnings: string[];
@@ -54,7 +51,7 @@ function plural(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-function collectWarnings(root: Element, widthMm: number, heightMm: number): string[] {
+function collectWarnings(root: Element): string[] {
   const all = Array.from(root.getElementsByTagName('*'));
   const byId = new Map<string, Element>();
   for (const el of all) {
@@ -114,16 +111,6 @@ function collectWarnings(root: Element, widthMm: number, heightMm: number): stri
   if (!all.some((e) => STITCHABLE.has(e.localName) && !e.closest('defs'))) {
     warnings.push('Nothing to stitch — the drawing contains no paths or shapes');
   }
-  if (widthMm > MAX_DESIGN_MM || heightMm > MAX_DESIGN_MM) {
-    warnings.push(
-      `The design is ${fmt(Math.round(widthMm))} × ${fmt(Math.round(heightMm))} mm — larger than ${MAX_DESIGN_MM} × ${MAX_DESIGN_MM} mm, which won't fit most hoops. Resize it before converting`,
-    );
-  }
-  if (widthMm < MIN_DESIGN_MM || heightMm < MIN_DESIGN_MM) {
-    warnings.push(
-      `The design is only ${fmt(Math.round(widthMm * 100) / 100)} × ${fmt(Math.round(heightMm * 100) / 100)} mm — very small. Resize it before converting`,
-    );
-  }
   return [...new Set(warnings)];
 }
 
@@ -162,7 +149,7 @@ export function normalizeSvg(text: string): NormalizedSvg {
   root.setAttribute('height', `${fmt(heightMm)}mm`);
 
   removeCruft(root);
-  const warnings = collectWarnings(root, widthMm, heightMm);
+  const warnings = collectWarnings(root);
   const svg = new XMLSerializer().serializeToString(root);
   return { page: { svg, widthMm, heightMm }, warnings };
 }
