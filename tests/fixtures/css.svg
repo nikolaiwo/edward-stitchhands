@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40mm" height="30mm" viewBox="0 0 40 30">
+  <style>.blue { fill: #0000ff; stroke: none; }</style>
+  <rect x="3" y="3" width="15" height="12" style="fill:#ff00ff;stroke:none"/>
+  <rect class="blue" x="22" y="3" width="15" height="12"/>
+  <path d="M3 22 H37" style="fill:none;stroke:#00aa00;stroke-width:0.4px"/>
+</svg>

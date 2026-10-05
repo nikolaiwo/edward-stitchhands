@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "build-pybundle": "node scripts/build-pybundle.mjs",
+    "predev": "npm run build-pybundle",
     "dev": "vite",
+    "prebuild": "npm run build-pybundle",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run"
