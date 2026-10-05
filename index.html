@@ -3,11 +3,178 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Edward Stitchhands</title>
     <meta name="description" content="Turn SVG and PDF drawings into embroidery machine files, entirely in your browser." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
-    <div id="app"></div>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <svg class="logo" viewBox="0 0 48 48" width="54" height="54" aria-hidden="true">
+        <!-- scissors-meets-needle: crossed blades, one with an eye and a trailing thread, ring handles -->
+        <path d="M14 38 L33 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none" />
+        <path d="M34 38 L18 12 L15 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+        <ellipse cx="33.3" cy="9" rx="1" ry="2" transform="rotate(30 33.3 9)" fill="var(--bg, #fff)" stroke="currentColor" stroke-width="0.8" />
+        <circle cx="12.5" cy="40.5" r="4.4" fill="none" stroke="var(--accent)" stroke-width="2.6" />
+        <circle cx="35.5" cy="40.5" r="4.4" fill="none" stroke="var(--accent)" stroke-width="2.6" />
+        <path d="M34.4 7 C 40 3, 44 9, 40 13 S 30 20, 42 27" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="1 3.2" fill="none" />
+      </svg>
+      <div>
+        <h1>Edward Stitchhands</h1>
+        <p class="tagline">Drawings in, embroidery files out — right in your browser</p>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="intake" aria-labelledby="intake-h">
+        <h2 id="intake-h" class="sr-only">Choose a drawing</h2>
+        <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-describedby="drop-hint">
+          <svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p class="drop-title"><strong>Drop an SVG or PDF here</strong>, or click to choose a file</p>
+          <p id="drop-hint" class="muted">You can also paste SVG code anywhere on the page (Ctrl/⌘ + V).</p>
+        </div>
+        <input id="file-input" type="file" accept=".svg,.pdf,image/svg+xml,application/pdf" hidden />
+        <p class="center"><button id="example-btn" type="button" class="btn secondary">Try an example</button></p>
+      </section>
+
+      <div id="engine-status" class="status hidden" aria-live="polite">
+        <div class="status-row"><span id="engine-msg">Starting…</span><span id="engine-pct" class="muted"></span></div>
+        <progress id="engine-bar" max="100" value="0" aria-label="Engine loading progress"></progress>
+        <p class="muted small">The first visit downloads the Python runtime and Ink/Stitch (~30 MB). It is cached by your browser afterwards.</p>
+      </div>
+
+      <div id="error" class="error hidden" role="alert"></div>
+
+      <section id="workspace" class="hidden" aria-labelledby="ws-h">
+        <div class="ws-head">
+          <h2 id="ws-h">Your drawing: <span id="doc-name"></span></h2>
+          <button id="change-file" type="button" class="btn link">Choose another file</button>
+        </div>
+        <ul id="doc-warnings" class="warnings hidden"></ul>
+
+        <div id="pages" class="pages hidden">
+          <h3>Pick a page</h3>
+          <div id="page-list" class="page-list" role="radiogroup" aria-label="Page"></div>
+        </div>
+
+        <div class="split">
+          <div class="card">
+            <h3>Original</h3>
+            <div class="orig-frame"><img id="orig-img" alt="Preview of the selected drawing" /></div>
+            <p id="orig-info" class="muted small"></p>
+          </div>
+
+          <form id="settings" class="card" autocomplete="off" onsubmit="return false">
+            <div class="card-head">
+              <h3>Settings</h3>
+              <button id="reset" type="button" class="btn link">Reset to defaults</button>
+            </div>
+
+            <fieldset>
+              <legend>Size</legend>
+              <div class="row">
+                <label class="field">Width (mm)<input id="size-w" type="number" min="5" max="1000" step="0.1" inputmode="decimal" /></label>
+                <button id="lock" type="button" class="lock" aria-pressed="true" title="Lock aspect ratio" aria-label="Lock aspect ratio">
+                  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path class="lock-closed" d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path class="lock-open" d="M7 11V8a5 5 0 0 1 9.5-2M6 11h12v9H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                </button>
+                <label class="field">Height (mm)<input id="size-h" type="number" min="5" max="1000" step="0.1" inputmode="decimal" /></label>
+              </div>
+              <div class="row">
+                <label class="field grow">Hoop<select id="hoop"></select></label>
+                <label class="field custom-hoop hidden">W<input id="hoop-w" type="number" min="5" max="1000" step="1" inputmode="numeric" /></label>
+                <label class="field custom-hoop hidden">H<input id="hoop-h" type="number" min="5" max="1000" step="1" inputmode="numeric" /></label>
+              </div>
+              <p id="hoop-note" class="small" aria-live="polite"></p>
+            </fieldset>
+
+            <fieldset>
+              <legend>Stitching</legend>
+              <label class="field"><span>Fill density: <output id="density-out"></output></span>
+                <input id="density" type="range" min="-0.5" max="-0.15" step="0.05" />
+                <span class="range-labels small muted" aria-hidden="true"><span>Light</span><span>Normal</span><span>Dense</span></span>
+              </label>
+              <label class="field"><span>Fill angle: <output id="angle-out"></output></span>
+                <input id="angle" type="range" min="0" max="180" step="5" />
+              </label>
+              <label class="check"><input id="underlay" type="checkbox" /> Underlay (stabilising stitches under fills)</label>
+              <label class="check"><input id="lock-stitches" type="checkbox" /> Lock stitches (tie-in / tie-off)</label>
+              <label class="field">Running stitch length (mm)<input id="run-len" type="number" min="0.5" max="10" step="0.1" inputmode="decimal" /></label>
+              <label class="field">Bean stitch repeats<input id="bean" type="number" min="0" max="5" step="1" inputmode="numeric" /></label>
+              <div class="field">
+                <label for="satin">Satin for strokes wider than (mm)</label>
+                <div class="row tight">
+                  <input id="satin" type="number" min="0.2" max="20" step="0.1" inputmode="decimal" />
+                  <label class="check inline"><input id="satin-off" type="checkbox" /> Off</label>
+                </div>
+              </div>
+              <details>
+                <summary>Advanced</summary>
+                <label class="field">Max fill stitch length (mm)<input id="max-len" type="number" min="0.5" max="12" step="0.1" inputmode="decimal" /></label>
+                <label class="field">Trim jumps longer than (mm)<input id="trim" type="number" min="0" max="100" step="0.5" inputmode="decimal" /></label>
+                <label class="field">Minimum stitch length (mm)<input id="min-len" type="number" min="0" max="5" step="0.05" inputmode="decimal" /></label>
+              </details>
+            </fieldset>
+
+            <fieldset>
+              <legend>Output formats</legend>
+              <div id="formats" class="formats"></div>
+            </fieldset>
+          </form>
+        </div>
+
+        <div class="convert-row">
+          <button id="convert" type="button" class="btn primary" disabled><span id="convert-spin" class="spinner hidden" aria-hidden="true"></span><span id="convert-label">Convert to embroidery</span></button>
+          <span id="convert-hint" class="muted small" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section id="result" class="hidden" aria-labelledby="res-h">
+        <h2 id="res-h">Stitch preview</h2>
+        <div class="card">
+          <div class="toolbar" role="toolbar" aria-label="Preview controls">
+            <button id="zoom-in" type="button" class="btn small" aria-label="Zoom in">+</button>
+            <button id="zoom-out" type="button" class="btn small" aria-label="Zoom out">−</button>
+            <button id="fit" type="button" class="btn small">Fit</button>
+            <label class="check inline"><input id="show-jumps" type="checkbox" /> Show jumps</label>
+            <label class="check inline"><input id="realistic" type="checkbox" /> Realistic</label>
+          </div>
+          <div class="canvas-wrap"><canvas id="stitch-canvas" tabindex="0" role="img" aria-label="Stitch preview. Scroll to zoom, drag to pan, plus and minus keys to zoom, zero to fit."></canvas></div>
+          <div class="playback">
+            <button id="play" type="button" class="btn small" aria-label="Play">▶</button>
+            <input id="scrub" type="range" min="0" max="1" step="1" value="1" aria-label="Sewing progress" />
+            <label class="speed">Speed
+              <select id="speed"><option value="100">Slow</option><option value="500" selected>Normal</option><option value="2500">Fast</option><option value="12000">Turbo</option></select>
+            </label>
+          </div>
+          <p id="progress-text" class="muted small" aria-live="off"></p>
+        </div>
+
+        <div class="split result-split">
+          <div class="card">
+            <h3>Stats</h3>
+            <dl id="stats" class="stats"></dl>
+            <h3>Colors</h3>
+            <ul id="swatches" class="swatches"></ul>
+            <p class="muted small">Click a color to hide or show its stitches.</p>
+          </div>
+          <div class="card">
+            <h3>Downloads</h3>
+            <div id="downloads" class="downloads"></div>
+            <ul id="result-warnings" class="warnings hidden"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Runs entirely in your browser — your files never leave your device.</p>
+      <p class="links">
+        <a href="https://github.com/nikolaiwo/edward-stitchhands" target="_blank" rel="noopener">Source code</a> (AGPL-3.0)
+        · <a href="https://inkstitch.org" target="_blank" rel="noopener">Stitching powered by Ink/Stitch</a>
+        · <a href="https://github.com/nikolaiwo/edward-stitchhands/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener">Third-party licenses</a>
+      </p>
+    </footer>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
