@@ -45,6 +45,8 @@ from lib.threads import ThreadCatalog  # noqa: E402
 from lib.update import update_inkstitch_document  # noqa: E402
 from lib.utils.settings import global_settings  # noqa: E402
 
+from edward.repair import repair_fills  # noqa: E402
+
 NORMAL, JUMP, TRIM = 0, 1, 2
 
 
@@ -242,6 +244,7 @@ def convert(svg, options_json, formats, base_name="design"):
         if options.get("satinMinStrokeWidthMm") is not None:
             metadata["min_satin_stroke_width_mm"] = options["satinMinStrokeWidthMm"]
 
+        repair_fills(root)
         _apply_options(root, options, warnings)
         elements = _collect_elements(root, warnings)
         groups = _stitch_groups(elements, options["trimJumpsLongerThanMm"], warnings)

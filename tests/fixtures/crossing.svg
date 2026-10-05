@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100mm" height="50mm" viewBox="0 0 100 50">
+  <!-- one-stroke star: its border crosses itself 5 times; nonzero fills the centre pentagon -->
+  <path id="star" d="M 25 2 L 39.7 47 L 1.2 19.3 L 48.8 19.3 L 10.3 47 Z" fill="#d23c3c"/>
+  <!-- figure-8 bow tie: two pieces joined at a crossing point -->
+  <path id="bowtie" d="M 55 5 L 95 45 L 95 5 L 55 45 Z" fill="#3c6ed2"/>
+</svg>

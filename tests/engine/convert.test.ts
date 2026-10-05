@@ -74,6 +74,7 @@ describe('fixtures', () => {
     ['nested.svg', [100, 60], [20, 10, 60, 50], 1],
     ['css.svg', [40, 30], [3, 3, 37, 22], 3],
     ['inch.svg', [50.8, 25.4], [14.8, 2.1, 36, 23.3], 1],
+    ['crossing.svg', [100, 50], [1.2, 2, 95, 47], 2],
   ];
 
   it.each(cases)(
@@ -154,6 +155,28 @@ describe('fixtures', () => {
         expect(inside, `stitch at ${c[i]},${c[i + 1]} lies in the hole`).toBe(false);
       }
     }
+  }, TIMEOUT);
+
+  it('repairs self-crossing fills, honouring fill-rule', async () => {
+    const stitchesNear = (r: PyResult, cx: number, cy: number, radius: number) => {
+      let n = 0;
+      for (const b of r.plan.blocks) {
+        const c = new Float32Array(b.coords.slice().buffer);
+        for (let i = 0; i < c.length; i += 2) if (Math.hypot(c[i] - cx, c[i + 1] - cy) < radius) n++;
+      }
+      return n;
+    };
+    const nonzero = await convert(fixture('crossing.svg'), {}, ['dst']);
+    expect(nonzero.warnings.join('\n')).not.toMatch(/crosses itself|Unconnected/i);
+    expect(stitchesNear(nonzero, 25, 28, 3), 'nonzero star centre is filled').toBeGreaterThan(20);
+    // both halves of the bow tie are stitched
+    expect(stitchesNear(nonzero, 62, 25, 3)).toBeGreaterThan(5);
+    expect(stitchesNear(nonzero, 88, 25, 3)).toBeGreaterThan(5);
+
+    const evenodd = await convert(fixture('crossing-evenodd.svg'), {}, ['dst']);
+    expect(evenodd.warnings.join('\n')).not.toMatch(/crosses itself|Unconnected/i);
+    expect(stitchesNear(evenodd, 25, 28, 3), 'evenodd star centre is a hole').toBe(0);
+    expect(stitchesNear(evenodd, 25, 8, 3), 'evenodd star points are filled').toBeGreaterThan(5);
   }, TIMEOUT);
 
   it('options change the output (density, lock stitches)', async () => {
