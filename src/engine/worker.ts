@@ -10,6 +10,8 @@ interface Manifest {
   pyodidePackages: string[];
   micropipPackages: string[];
   bundleBytes: number;
+  /** Content hash of bundle.zip, appended as ?v= so a new deploy is never served from cache. */
+  bundleHash: string;
 }
 
 const base = import.meta.env.BASE_URL;
@@ -44,13 +46,13 @@ async function fetchBundle(url: string, total: number, onFraction: (f: number) =
 
 async function loadEngine(report: (p: EngineProgress) => void): Promise<PyodideInterface> {
   report({ stage: 'download', message: 'Downloading embroidery engine…', fraction: 0 });
-  const manifest: Manifest = await (await fetch(`${base}py/manifest.json`)).json();
+  const manifest: Manifest = await (await fetch(`${base}py/manifest.json`, { cache: 'no-cache' })).json();
 
   const { loadPyodide } = (await import(
     /* @vite-ignore */ `https://cdn.jsdelivr.net/pyodide/v${manifest.pyodideVersion}/full/pyodide.mjs`
   )) as typeof import('pyodide');
   const pyodideLoading = loadPyodide();
-  const bundlePromise = fetchBundle(`${base}py/bundle.zip`, manifest.bundleBytes, (f) =>
+  const bundlePromise = fetchBundle(`${base}py/bundle.zip?v=${manifest.bundleHash}`, manifest.bundleBytes, (f) =>
     report({ stage: 'download', message: 'Downloading embroidery engine…', fraction: f * 0.5 }),
   );
   const [pyodide, bundle] = await Promise.all([pyodideLoading, bundlePromise]);

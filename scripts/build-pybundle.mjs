@@ -1,5 +1,6 @@
 // Builds public/py/bundle.zip (Ink/Stitch + inkex + our glue code) and public/py/manifest.json.
 // Run via `npm run build-pybundle` (hooked into predev/prebuild).
+import { createHash } from 'node:crypto';
 import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -58,10 +59,13 @@ for (const [src, dest] of SOURCES) {
 const buf = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
 const pyodideVersion = JSON.parse(await readFile(join(root, 'node_modules/pyodide/package.json'), 'utf8')).version;
 
+// content hash, used as a cache-busting query so browsers/CDNs never serve a stale bundle after a deploy
+const bundleHash = createHash('sha256').update(buf).digest('hex').slice(0, 16);
+
 await mkdir(outDir, { recursive: true });
 await writeFile(join(outDir, 'bundle.zip'), buf);
 await writeFile(
   join(outDir, 'manifest.json'),
-  JSON.stringify({ pyodideVersion, pyodidePackages: PYODIDE_PACKAGES, micropipPackages: MICROPIP_PACKAGES, bundleBytes: buf.length }, null, 2) + '\n',
+  JSON.stringify({ pyodideVersion, pyodidePackages: PYODIDE_PACKAGES, micropipPackages: MICROPIP_PACKAGES, bundleBytes: buf.length, bundleHash }, null, 2) + '\n',
 );
 console.log(`py bundle: ${(buf.length / 1024).toFixed(0)} KiB -> public/py/bundle.zip`);
