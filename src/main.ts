@@ -1,2 +1,4 @@
-// Placeholder until the UI workstream lands.
-document.querySelector<HTMLDivElement>('#app')!.textContent = 'Edward Stitchhands — coming soon.';
+import './style.css';
+import { initApp } from './ui/app';
+
+initApp();
