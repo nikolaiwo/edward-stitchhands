@@ -71,53 +71,86 @@
               <button id="reset" type="button" class="btn link">Reset to defaults</button>
             </div>
 
+            <details class="tips">
+              <summary>Tuning tips — what to change when…</summary>
+              <dl>
+                <dt>The fabric puckers or wrinkles</dt>
+                <dd>Move <em>Fill density</em> towards Light and keep <em>Underlay</em> on. Hoop the fabric tight with a stabiliser underneath.</dd>
+                <dt>Fabric shows through the fills</dt>
+                <dd>Move <em>Fill density</em> towards Dense.</dd>
+                <dt>Outlines look too thin</dt>
+                <dd>Set <em>Bean stitch repeats</em> to 1, or make the lines wider than the <em>Satin</em> threshold in your drawing.</dd>
+                <dt>Loose threads between parts</dt>
+                <dd>Lower <em>Trim jumps longer than</em> so the machine cuts the thread more often.</dd>
+                <dt>Thread breaks or tangles in small details</dt>
+                <dd>Make the design bigger, or raise <em>Minimum stitch length</em>. Details under about 4&nbsp;mm rarely stitch cleanly.</dd>
+                <dt>It takes too long to sew</dt>
+                <dd>Use a lighter <em>Fill density</em>, turn off <em>Underlay</em> on small designs, or use fewer colours.</dd>
+                <dt>Stretchy fabric (T-shirts, knits)</dt>
+                <dd>Use a lighter density, keep underlay on, and use a cut-away stabiliser.</dd>
+              </dl>
+            </details>
+
             <fieldset>
               <legend>Size</legend>
               <div class="row">
-                <label class="field">Width (mm)<input id="size-w" type="number" min="5" max="1000" step="0.1" inputmode="decimal" /></label>
+                <label class="field">Width (mm)<input id="size-w" type="number" min="5" max="1000" step="0.1" inputmode="decimal" aria-describedby="h-size" /></label>
                 <button id="lock" type="button" class="lock" aria-pressed="true" title="Lock aspect ratio" aria-label="Lock aspect ratio">
                   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path class="lock-closed" d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path class="lock-open" d="M7 11V8a5 5 0 0 1 9.5-2M6 11h12v9H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
                 </button>
-                <label class="field">Height (mm)<input id="size-h" type="number" min="5" max="1000" step="0.1" inputmode="decimal" /></label>
+                <label class="field">Height (mm)<input id="size-h" type="number" min="5" max="1000" step="0.1" inputmode="decimal" aria-describedby="h-size" /></label>
               </div>
+              <p id="h-size" class="hint">The finished size on the fabric. Resizing keeps the stitch density the same, so a bigger design means more stitches. Fine details need to stay at least 3–4&nbsp;mm.</p>
               <div class="row">
-                <label class="field grow">Hoop<select id="hoop"></select></label>
+                <label class="field grow">Hoop<select id="hoop" aria-describedby="h-hoop"></select></label>
                 <label class="field custom-hoop hidden">W<input id="hoop-w" type="number" min="5" max="1000" step="1" inputmode="numeric" /></label>
                 <label class="field custom-hoop hidden">H<input id="hoop-h" type="number" min="5" max="1000" step="1" inputmode="numeric" /></label>
               </div>
+              <p id="h-hoop" class="hint">Your machine's embroidery area. A drawing bigger than the hoop is scaled down to fit when you load it.</p>
               <p id="hoop-note" class="small" aria-live="polite"></p>
             </fieldset>
 
             <fieldset>
               <legend>Stitching</legend>
               <label class="field"><span>Fill density: <output id="density-out"></output></span>
-                <input id="density" type="range" min="-0.5" max="-0.15" step="0.05" />
+                <input id="density" type="range" min="-0.5" max="-0.15" step="0.05" aria-describedby="h-density" />
                 <span class="range-labels small muted" aria-hidden="true"><span>Light</span><span>Normal</span><span>Dense</span></span>
               </label>
+              <p id="h-density" class="hint">The gap between rows of fill stitches. Dense gives solid coverage but is stiffer and can pucker thin fabric. Light is softer and faster, but the fabric may show through. Normal (0.25&nbsp;mm) suits most woven fabrics.</p>
               <label class="field"><span>Fill angle: <output id="angle-out"></output></span>
-                <input id="angle" type="range" min="0" max="180" step="5" />
+                <input id="angle" type="range" min="0" max="180" step="5" aria-describedby="h-angle" />
               </label>
-              <label class="check"><input id="underlay" type="checkbox" /> Underlay (stabilising stitches under fills)</label>
-              <label class="check"><input id="lock-stitches" type="checkbox" /> Lock stitches (tie-in / tie-off)</label>
-              <label class="field">Running stitch length (mm)<input id="run-len" type="number" min="0.5" max="10" step="0.1" inputmode="decimal" /></label>
-              <label class="field">Bean stitch repeats<input id="bean" type="number" min="0" max="5" step="1" inputmode="numeric" /></label>
+              <p id="h-angle" class="hint">Which way the fill rows run. This mostly changes the look: rows catch the light differently, so a different angle per design gives texture.</p>
+              <label class="check"><input id="underlay" type="checkbox" aria-describedby="h-underlay" /> Underlay (stabilising stitches under fills)</label>
+              <p id="h-underlay" class="hint check-hint">A light layer sewn first that holds the fabric flat and lifts the top stitches. Keep it on for most designs. Turn it off for tiny shapes, where it only adds bulk.</p>
+              <label class="check"><input id="lock-stitches" type="checkbox" aria-describedby="h-lock" /> Lock stitches (tie-in / tie-off)</label>
+              <p id="h-lock" class="hint check-hint">Tiny back-and-forth stitches at the start and end of each section so the thread can't unravel after a trim. Leave on unless your machine adds its own.</p>
+              <label class="field">Running stitch length (mm)<input id="run-len" type="number" min="0.5" max="10" step="0.1" inputmode="decimal" aria-describedby="h-run" /></label>
+              <p id="h-run" class="hint">Stitch length for thin lines and outlines. 2–3&nbsp;mm is typical. Use 1.5&nbsp;mm or less for tight curves and small lettering.</p>
+              <label class="field">Bean stitch repeats<input id="bean" type="number" min="0" max="5" step="1" inputmode="numeric" aria-describedby="h-bean" /></label>
+              <p id="h-bean" class="hint">Sews each line stitch back and forth to make outlines bolder. 0 is a normal line, 1 is three times as thick, 2 is five times.</p>
               <div class="field">
                 <label for="satin">Satin for strokes wider than (mm)</label>
                 <div class="row tight">
-                  <input id="satin" type="number" min="0.2" max="20" step="0.1" inputmode="decimal" />
+                  <input id="satin" type="number" min="0.2" max="20" step="0.1" inputmode="decimal" aria-describedby="h-satin" />
                   <label class="check inline"><input id="satin-off" type="checkbox" /> Off</label>
                 </div>
               </div>
+              <p id="h-satin" class="hint">Lines at least this wide become satin columns: smooth, shiny zig-zag borders. Thinner lines stay running stitch. Satin looks best between 1 and about 8&nbsp;mm wide; wider satin gets loose and can snag.</p>
               <details>
                 <summary>Advanced</summary>
-                <label class="field">Max fill stitch length (mm)<input id="max-len" type="number" min="0.5" max="12" step="0.1" inputmode="decimal" /></label>
-                <label class="field">Trim jumps longer than (mm)<input id="trim" type="number" min="0" max="100" step="0.5" inputmode="decimal" /></label>
-                <label class="field">Minimum stitch length (mm)<input id="min-len" type="number" min="0" max="5" step="0.05" inputmode="decimal" /></label>
+                <label class="field">Max fill stitch length (mm)<input id="max-len" type="number" min="0.5" max="12" step="0.1" inputmode="decimal" aria-describedby="h-maxlen" /></label>
+                <p id="h-maxlen" class="hint">The longest single stitch inside a fill row. Longer gives a smoother sheen but can snag. Shorter is sturdier but means more stitches. 3&nbsp;mm is a safe default.</p>
+                <label class="field">Trim jumps longer than (mm)<input id="trim" type="number" min="0" max="100" step="0.5" inputmode="decimal" aria-describedby="h-trim" /></label>
+                <p id="h-trim" class="hint">When the needle has to travel further than this between parts, the machine cuts the thread instead of leaving a loose thread to snip by hand. Lower means cleaner results but more trims, which is slower.</p>
+                <label class="field">Minimum stitch length (mm)<input id="min-len" type="number" min="0" max="5" step="0.05" inputmode="decimal" aria-describedby="h-minlen" /></label>
+                <p id="h-minlen" class="hint">Stitches shorter than this are dropped. Very short stitches pile up and can break the thread or needle. 0.1–0.3&nbsp;mm works for most machines.</p>
               </details>
             </fieldset>
 
             <fieldset>
               <legend>Output formats</legend>
+              <p class="hint">Choose the format your machine reads; check its manual or the extension of files it already uses. Not sure? DST works on almost every machine but doesn't store thread colours. Brother and Babylock machines use PES.</p>
               <div id="formats" class="formats"></div>
             </fieldset>
           </form>
