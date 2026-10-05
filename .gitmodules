@@ -1,0 +1,6 @@
+[submodule "vendor/inkstitch"]
+	path = vendor/inkstitch
+	url = https://github.com/inkstitch/inkstitch.git
+[submodule "vendor/inkex"]
+	path = vendor/inkex
+	url = https://gitlab.com/inkscape/extensions.git

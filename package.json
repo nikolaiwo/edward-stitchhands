@@ -1,0 +1,28 @@
+{
+  "name": "edward-stitchhands",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "typescript": "~6.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "mupdf": "^1.28.1",
+    "pyodide": "^314.0.7",
+    "jszip": "^3.10.2"
+  },
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nikolaiwo/edward-stitchhands.git"
+  }
+}
